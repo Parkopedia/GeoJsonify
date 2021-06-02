@@ -148,7 +148,7 @@ public class OpenStreetMapActivity extends MapBaseActivity implements LocationLi
     private void startLocationUpdates() {
         for (final String provider : mLocationManager.getProviders(true)) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                mLocationManager.requestLocationUpdates(provider, 1000, 0.0f, this);
+                mLocationManager.requestLocationUpdates(provider, 1000, 1.0f, this);
             }
         }
     }
@@ -203,14 +203,13 @@ public class OpenStreetMapActivity extends MapBaseActivity implements LocationLi
     }
 
     private void reCenterOnRoute(GeoPoint locationPoint){
-        List<GeoPoint> positionAndTraj = new ArrayList<>(routePoints.subList(routeIndex, routeIndex + nIndexAhead));
+        List<GeoPoint> positionAndTraj = new ArrayList<>(routeAhead.subList(0, nIndexAhead));
         positionAndTraj.add(locationPoint);
         Polyline polylineToCenter = new Polyline();
         polylineToCenter.setVisible(false);
         polylineToCenter.setPoints(positionAndTraj);
         BoundingBox boundingBox =  polylineToCenter.getBounds();
         map.zoomToBoundingBox(boundingBox.increaseByScale(1.3f), true);
-
     }
 
     @Override
