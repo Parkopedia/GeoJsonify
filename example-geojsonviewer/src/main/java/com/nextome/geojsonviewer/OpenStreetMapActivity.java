@@ -18,7 +18,6 @@ package com.nextome.geojsonviewer;
 
 
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
@@ -57,7 +56,6 @@ public class OpenStreetMapActivity extends MapBaseActivity implements LocationLi
     List<GeoPoint> routeAhead;
 
     MapView map = null;
-    Polyline trackLine = new Polyline();
     Polyline routeLine = new Polyline();
     boolean isCentered = false;
     int routeIndex;
@@ -98,10 +96,13 @@ public class OpenStreetMapActivity extends MapBaseActivity implements LocationLi
 
         mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
+//        display route on the map. One simply has to set the points of routeLine with the method
+//        .setPoints to change the displayed line
         routeLine.setWidth(8f);
         routeLine.setColor(this.getJsonColors().get(0));
         map.getOverlayManager().add(routeLine);
 
+//        extract the Kml features as a list of points
         for (KmlFeature p : mKmlDocument.mKmlRoot.mItems) {
             if (p instanceof KmlPlacemark) {
                 KmlPlacemark placemark = (KmlPlacemark) p;
@@ -117,21 +118,25 @@ public class OpenStreetMapActivity extends MapBaseActivity implements LocationLi
     }
 
     private void initCenterButton() {
+//        center on next point on the route
         Button centerPositionButton = findViewById(R.id.centerButton);
         centerPositionButton.setOnClickListener(this);
     }
 
     private void initStartButton() {
+//        start the navigation at this point
         Button startNavigationButton = findViewById(R.id.startButton);
         startNavigationButton.setOnClickListener(this);
     }
 
     private void initContinueButton() {
+//        continue navigation from this point
         Button continueNavigationButton = findViewById(R.id.continueButton);
         continueNavigationButton.setOnClickListener(this);
     }
 
     private void initProgressBar() {
+//      progress bar that displays how far we are on the track
         ProgressBar progressBar = findViewById(R.id.navigationProgressBar);
         progressBar.setOnClickListener(this);
         progressBar.setMax(routePoints.size());
@@ -154,6 +159,7 @@ public class OpenStreetMapActivity extends MapBaseActivity implements LocationLi
             myLocationOverlay.enableFollowLocation();
         }
         Configuration.getInstance().load(this, PreferenceManager.getDefaultSharedPreferences(this));
+//        needed to call the method onLocationChanged
         startLocationUpdates();
     }
 
@@ -190,6 +196,8 @@ public class OpenStreetMapActivity extends MapBaseActivity implements LocationLi
     private void reCenterOnRoute(GeoPoint locationPoint){
         List<GeoPoint> positionAndTraj = new ArrayList<>(routeAhead.subList(0, nIndexAhead));
         positionAndTraj.add(locationPoint);
+//        create a polyline containing the user position + the displayed route.
+//        We can zoom on the bounds of this polyline.
         Polyline polylineToCenter = new Polyline();
         polylineToCenter.setVisible(false);
         polylineToCenter.setPoints(positionAndTraj);
@@ -199,6 +207,7 @@ public class OpenStreetMapActivity extends MapBaseActivity implements LocationLi
 
     @Override
     public void onLocationChanged(final Location pLoc) {
+//        this method is called everytime a change of the location is detected
         GeoPoint newLocation = new GeoPoint(pLoc);
         updateDisplayedRoute(newLocation, true);
         ProgressBar progressBar = findViewById(R.id.navigationProgressBar);
@@ -207,9 +216,6 @@ public class OpenStreetMapActivity extends MapBaseActivity implements LocationLi
         if (isCentered) {
             reCenterOnRoute(newLocation);
         }
-
-        previousLocations.add(newLocation);
-        trackLine.setPoints(previousLocations);
     }
 
     @Override
