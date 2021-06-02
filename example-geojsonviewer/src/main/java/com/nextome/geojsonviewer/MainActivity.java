@@ -32,7 +32,6 @@ import me.priyesh.chroma.ColorMode;
 import me.priyesh.chroma.ColorSelectListener;
 
 import android.view.View;
-import android.webkit.MimeTypeMap;
 import android.widget.TextView;
 import android.widget.Toast;
 
