@@ -157,39 +157,31 @@ public class OpenStreetMapActivity extends MapBaseActivity implements LocationLi
         startLocationUpdates();
     }
 
-    private void initializeDisplayedRoute(GeoPoint currentPoint) {
+    private int findNearestIndex(GeoPoint currentPoint, List<GeoPoint> points, double penaltyPerIndex) {
         double minDistance = 10e6;
         int minDistanceIndex = 0;
 
-        for (int i = 0; i < routePoints.size(); i = i + 1) {
-            GeoPoint pt = routePoints.get(i);
+        for (int i = 0; i < points.size(); i = i + 1) {
+            GeoPoint pt = points.get(i);
             double distance = pt.distanceToAsDouble(currentPoint);
-            if (distance + i * initPenaltyPerIndex <= minDistance) {
+            if (distance + i * penaltyPerIndex <= minDistance) {
                 minDistance = distance;
                 minDistanceIndex = i;
             }
         }
-        routeIndex = minDistanceIndex;
+        return minDistanceIndex;
+    }
+
+    private void initializeDisplayedRoute(GeoPoint currentPoint) {
+        routeIndex = findNearestIndex(currentPoint, routePoints, initPenaltyPerIndex);
         routeAhead = new ArrayList<>(routePoints.subList(routeIndex, routePoints.size()));
         routeLine.setPoints(routeAhead.subList(0, nIndexAhead));
     }
 
-    private void updateDisplayedRoute(GeoPoint currentPoint, boolean onlyDisplayed) {
-        double minDistance = 10e6;
-        int minDistanceIndex = 0;
 
-        int nSearch = nIndexAhead;
-        if (!onlyDisplayed){
-            nSearch = routeAhead.size();
-        }
-        for (int i = 0; i < routeAhead.subList(0, nSearch).size(); i = i + 1) {
-            GeoPoint pt = routeAhead.subList(0, nSearch).get(i);
-            double distance = pt.distanceToAsDouble(currentPoint);
-            if (distance + i * updatePenaltyPerIndex <= minDistance) {
-                minDistance = distance;
-                minDistanceIndex = i;
-            }
-        }
+    private void updateDisplayedRoute(GeoPoint currentPoint, boolean onlyDisplayed) {
+        int nSearch = onlyDisplayed ? nIndexAhead : routeAhead.size();
+        int minDistanceIndex = findNearestIndex(currentPoint, routeAhead.subList(0, nSearch), updatePenaltyPerIndex);
         routeIndex += minDistanceIndex;
         routeAhead = new ArrayList<>(routeAhead.subList(minDistanceIndex, routeAhead.size()));
         routeLine.setPoints(routeAhead.subList(0, nIndexAhead));
@@ -235,8 +227,6 @@ public class OpenStreetMapActivity extends MapBaseActivity implements LocationLi
 
     }
 
-
-    @SuppressLint("NonConstantResourceId")
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
@@ -258,6 +248,9 @@ public class OpenStreetMapActivity extends MapBaseActivity implements LocationLi
                 break;
             case R.id.continueButton:
                 updateDisplayedRoute(new GeoPoint(myLocationOverlay.getMyLocation()), false);
+                if (isCentered){
+                    reCenterOnRoute(new GeoPoint(myLocationOverlay.getMyLocation()));
+                }
                 break;
             default:
                 break;
