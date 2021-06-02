@@ -41,6 +41,7 @@ dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
     implementation 'com.mapbox.mapboxsdk:mapbox-android-sdk:7.3.0'
+    implementation 'org.osmdroid:osmdroid-android:6.1.10'
 
     implementation 'me.priyesh:chroma:1.0.2'
     implementation 'com.karumi:dexter:5.0.0'
